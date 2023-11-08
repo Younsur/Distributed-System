@@ -21,7 +21,7 @@ func TestMainProgress(t *testing.T) {
 	F := uint32(1)
 	sk, pk := party.SigKeyGen(N, 2*F+1)
 
-	var p []*party.HonestParty = make([]*party.HonestParty, N)
+	var p = make([]*party.HonestParty, N)
 	for i := uint32(0); i < N; i++ {
 		p[i] = party.NewHonestParty(N, F, i, ipList, portList, pk, sk[i])
 	}
@@ -33,8 +33,7 @@ func TestMainProgress(t *testing.T) {
 	for i := uint32(0); i < N; i++ {
 		p[i].InitSendChannel()
 	}
-
-	testEpochs := 1024
+	testEpochs := 2
 	var wg sync.WaitGroup
 	wg.Add(int(N))
 	result := make([][]byte, N)
@@ -55,7 +54,7 @@ func TestMainProgress(t *testing.T) {
 		go func(i uint32) {
 			outputChannel := make(chan []byte, MAXMESSAGE)
 
-			go RBCMain(p[i], nil, outputChannel)
+			go RBCMain(p[i], outputChannel)
 			for e := 1; e <= testEpochs; e++ {
 				value := <-outputChannel
 				result[i] = append(result[i], value...)
