@@ -8,7 +8,7 @@ import (
 )  
   
 const (  
-    n     = 5 // 系统中副本的数量  
+    n     = 4 // 系统中副本的数量  
     k     = 3 // 系统中正确副本的数量  
     id    = 0 // 本机的ID  
     delay = 2 * time.Second // 延迟时间  
