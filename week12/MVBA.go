@@ -64,3 +64,41 @@ func main() {
         }()  
     }  
     wg.Wait() // 等待所有goroutine执行完毕，确保所有副本都收到的提议值都处理完毕  
+
+  // 进入MVBA阶段  
+  for {  
+    // 选择一个输出值  
+      var output int  
+      for {  
+          output = -1  
+          for i := 0; i < n; i++ {  
+              if local[i] == 1 {  
+                  output = i  
+                  break  
+              }  
+          }  
+          if output == -1 {  
+              // 没有正确的副本选择输出值，重新进入MVBA阶段  
+              continue  
+          }  
+          // 检查其他副本的选择值是否与自己相同  
+          for i := 0; i < n; i++ {  
+              if i != id && local[i] == 0 && output != i {  
+                  // 其他副本的选择值与自己不同，重新进入MVBA阶段  
+                  continue outer  
+              }  
+          }  
+          break  
+      }  
+      // 广播自己的选择值  
+      broadcast(output)  
+      // 处理收到的其他副本的选择值，更新本地状态  
+      delivered(output)  
+      // 检查自己是否是正确副本，如果是则输出最终结果，否则输出收到的其他副本的选择值  
+      if local[output] == 1 {  
+          fmt.Printf("Replica %d: Output: %d\n", id, output)  
+      } else {  
+          fmt.Printf("Replica %d: Output: %d (Received from Replica %d)\n", id, output, output)  
+      }  
+  }
+}
